@@ -9,6 +9,7 @@ public class DesktopLauncher {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = Fractals.WIDTH;
 		config.height = Fractals.HEIGHT;
+		config.samples = 5;
 		new LwjglApplication(new Fractals(), config);
 	}
 }

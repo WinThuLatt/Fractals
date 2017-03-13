@@ -61,7 +61,7 @@ public class Menu implements Disposable
 	TextButton menger = new TextButton("Menger", skin);
 	TextButton mengerR = new TextButton("Reversed Menger", skin);
 	TextButton mandelbrot = new TextButton("Mandelbrot Set", skin);
-	TextButton trees = new TextButton("Tree", skin);
+	TextButton trees = new TextButton("CircleFractals", skin);
 
 	menger.addListener(new ClickListener()
 	{

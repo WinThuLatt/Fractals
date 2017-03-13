@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.utils.Array;
 import com.win.fractals.Fractals;
-import com.win.fractals.Utilities.HUD2;
+import com.win.fractals.Utilities.MandelbrotHUD;
 import com.win.fractals.Utilities.ICallback;
 
 /**
@@ -24,7 +24,7 @@ import com.win.fractals.Utilities.ICallback;
 
 public class Mandelbrot implements Screen, InputProcessor, ICallback
 {
-    public HUD2 hud;
+    public MandelbrotHUD hud;
     private Fractals f;
 
     private Texture texture;
@@ -34,7 +34,7 @@ public class Mandelbrot implements Screen, InputProcessor, ICallback
     public Mandelbrot(Fractals f)
     {
 	this.f = f;
-	hud = new HUD2(f, this);
+	hud = new MandelbrotHUD(f, this);
 
 	InputMultiplexer inputMultiplexer = new InputMultiplexer();
 

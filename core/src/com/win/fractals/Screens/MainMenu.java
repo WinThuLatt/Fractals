@@ -44,7 +44,7 @@ public class MainMenu implements Screen
 	}
 	if (m.isTreesPressed())
 	{
-	    f.setScreen(new Trees(f));
+	    f.setScreen(new CircleFractals(f));
 	}
     }
 

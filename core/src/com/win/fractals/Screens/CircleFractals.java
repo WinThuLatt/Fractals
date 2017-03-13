@@ -4,15 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Pixmap.Format;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.Array;
 import com.win.fractals.Fractals;
-import com.win.fractals.Utilities.HUD2;
-import com.win.fractals.Utilities.ICallback;
+import com.win.fractals.Utilities.CircleFractalsHUD;
 
 /**
  * Created by WIN THU LATT on 12/7/2016.
@@ -21,19 +18,86 @@ import com.win.fractals.Utilities.ICallback;
  * youtube.
  */
 
-public class Trees implements Screen, InputProcessor, ICallback
+public class CircleFractals implements Screen, InputProcessor
 {
-    public HUD2 hud;
+
+    public CircleFractalsHUD hud;
     private Fractals f;
 
-    private Texture texture;
-    private int textureWidth = 360;
-    private int textureHeight = 360;
+    private float circleRadius = 100.0f;
+    private Whatever circle;
 
-    public Trees(Fractals f)
+    private float centerX = 0.0f;
+    private float centerY = 0.0f;
+
+    public class Whatever
+    {
+	private int index = 0;
+
+	private Whatever parent;
+	private float r;
+	private float x;
+	private float y;
+	private Whatever child = null;
+
+	public Whatever(float _x, float _y, float _r, Whatever _p)
+	{
+	    this.r = _r;
+	    this.x = _x;
+	    this.y = _y;
+	    this.parent = _p;
+	}
+
+	public Whatever(float _x, float _y, float _r)
+	{
+	    this(_x, _y, _r, null);
+	}
+
+	public Whatever addChild()
+	{
+	    float newR = r * 0.5f;
+	    float newX = x + newR;
+	    float newY = y;
+	    child = new Whatever(newX, newY, newR, this);
+	    child.index = this.index + 1;
+	    return child;
+	}
+
+	@Override
+	public String toString()
+	{
+	    return x + " " + y + " " + r;
+	}
+    }
+
+    private ShapeRenderer shapeRenderer;
+    private boolean run = true;
+
+    private void RunThis()
+    {
+	circle = new Whatever(centerX, centerY, circleRadius);
+	Whatever source = circle;
+	for (int i = 0; i < 2; i++)
+	{
+	    source = source.addChild();
+	}
+    }
+
+    public CircleFractals(Fractals f)
     {
 	this.f = f;
-	hud = new HUD2(f, this);
+	hud = new CircleFractalsHUD(f);
+
+	shapeRenderer = new ShapeRenderer();
+
+	centerX = Gdx.graphics.getWidth() / 2f;
+	centerY = Gdx.graphics.getHeight() / 2f;
+
+	if (run)
+	{
+	    RunThis();
+	    run = false;
+	}
 
 	InputMultiplexer inputMultiplexer = new InputMultiplexer();
 
@@ -67,13 +131,16 @@ public class Trees implements Screen, InputProcessor, ICallback
 	Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 	hud.draw();
+	Whatever next = circle;
 
-	if (texture != null)
+	shapeRenderer.begin(ShapeType.Line);
+	while (next != null)
 	{
-	    f.batch.begin();
-	    f.batch.draw(texture, 0, 0);
-	    f.batch.end();
+	    shapeRenderer.circle(next.x, next.y, next.r);
+	    next = next.child;
 	}
+	shapeRenderer.end();
+
     }
 
     @Override
@@ -151,63 +218,6 @@ public class Trees implements Screen, InputProcessor, ICallback
     public boolean scrolled(int amount)
     {
 	return false;
-    }
-
-    @Override
-    public void Redraw(float xmin, float xmax, float ymin, float ymax)
-    {
-	float R = 1;
-	float G = 1;
-	float B = 1;
-	int maxIterations = 500;
-	Color color;
-	Pixmap pixmap = new Pixmap(textureWidth, textureHeight, Format.RGBA8888);
-
-	for (int row = 0; row < textureWidth; row++)
-	{
-	    for (int col = 0; col < textureHeight; col++)
-	    {
-
-		float a = map(row, 0, textureWidth, xmin, xmax);
-		float b = map(col, 0, textureHeight, ymin, ymax);
-
-		float ca = a;
-		float cb = b;
-
-		int iter = 0;
-
-		while (iter < maxIterations)
-		{
-		    float aa = a * a - b * b;
-		    float bb = 2 * a * b;
-
-		    a = aa + ca;
-		    b = bb + cb;
-
-		    if (a + b > 16)
-		    {
-			break;
-		    }
-		    iter++;
-		}
-		G = map(iter, 0, 100, 0, 1);
-		G = map((float) Math.sqrt(G), 0, 1, 0, 1);
-		if (iter == maxIterations)
-		{
-		    G = 0;
-		}
-
-		color = new Color(R, G, B, 1);
-		pixmap.setColor(color);
-		pixmap.drawPixel(row, col);
-	    }
-	}
-
-	texture = new Texture(pixmap);
-
-	pixmap.dispose();
-
-	Gdx.app.log("redraw", "redraw called" + texture.toString());
     }
 
     public float map(float val, float min, float max, float minTarget, float maxTarget)
